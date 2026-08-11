@@ -48,6 +48,8 @@ Das bestehende Korpus hält diese Regeln nicht durchgängig ein – sie sind die
 8. **String-Variablen NIE mit `:=` setzen** (weder Literal noch `sA := sB`). Strings sind
    `ALLOC`-Puffer/Zeiger → immer `STRCPY`/`STRCAT`/`SPRINTF`. Einzige erlaubte `:=`-Zuweisung
    an einen String ist `sBuf := ALLOC(n);`.
+9. **Artikel-Prüfung vor dem Erfassen ist Pflicht:** vor jedem `PositionNeu`/`ProduktNeu`/
+   `Komponente` `GetGueltigeArtikelId(...)` aufrufen, bei `0` abbrechen (s. Abschnitt unten).
 
 ---
 
@@ -121,9 +123,11 @@ Kopf **und** Position teilen die Tabelle. Lookup:
   109 `ID_V_ID`, 1000 `ID_PREIS`, 1001 `ID_MENGE`, 1002 `ID_ARTIKELID`, 1272 `ID_V_DATUM_PLAN`,
   1439 `ID_WABEWPLANDAT`, **7100 `ID_GUID`**.
 
-**Artikel-Prüfung vor dem Erfassen:** `PositionNeu`/`ProduktNeu`/`Komponente` referenzieren den
-Artikel über **Artikelnummer + Lagernummer**. Vorher prüfen (Helfer `GetGueltigeArtikelId`, s.
-`assets/`): (1) existiert der Artikel im Ziellager, sonst `call AMIC_ArtikelKopie(ArtikelId,
+**Artikel-Prüfung vor dem Erfassen — PFLICHT:** **Immer** wenn eine Position über
+`PositionNeu`/`ProduktNeu`/`Komponente` erfasst wird, **vorher** `GetGueltigeArtikelId(...)`
+aufrufen und bei Rückgabe `0` abbrechen (schreibt automatisch einen FehlerProtokoll-Eintrag).
+Sie referenzieren den Artikel über **Artikelnummer + Lagernummer**; die Prüfung (Helfer
+`GetGueltigeArtikelId`, s. `assets/`): (1) existiert der Artikel im Ziellager, sonst `call AMIC_ArtikelKopie(ArtikelId,
 Lager)`; (2) Sperre je Vorgangsklasse: **`V_Klassnummer < 1000` = Verkauf → `ArtikelFaktSperr`**,
 **`>= 1000` = Einkauf UND interne Belege (Produktion/Umbuchung wie Einkauf) → `ArtikelBestSperr`**;
 (3) Belegdatum zwischen `ArtikelAbDatum`..`ArtikelBisDatum`. Rückgabe = buchbare `ArtikelId` bzw. `0`.

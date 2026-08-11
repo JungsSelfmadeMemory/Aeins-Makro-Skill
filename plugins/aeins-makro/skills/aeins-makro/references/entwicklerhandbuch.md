@@ -83,6 +83,10 @@ STRCPY(sBuf, "Hallo");            // richtig
 STRCPY(sBuf, sSql);              // richtig (Inhalt kopieren)
 ```
 
+### R9 – Artikel-Prüfung vor dem Erfassen ist Pflicht  ✅ bestätigt
+**Immer** vor `PositionNeu`/`ProduktNeu`/`Komponente` die Funktion `GetGueltigeArtikelId(...)`
+aufrufen und bei Rückgabe `0` abbrechen. Details/Beispiel: Abschnitt **6f**.
+
 ---
 
 ## 1. Programmgerüst & Parameter
@@ -408,7 +412,10 @@ gelesener Wert (String → Zahlen/Datum mit `SPRINTF`); letzter Parameter = **Sp
 
 > Die Addon-Spalte muss in der Ziel-DB existieren (`SELECT * FROM WarenBewegungAddon`).
 
-### 6f. Artikel-Prüfung vor dem Erfassen  ✅ verifiziert (Korpus)
+### 6f. Artikel-Prüfung vor dem Erfassen — PFLICHT  ✅ verifiziert (Korpus)
+> **Regel:** **Immer** wenn eine Position über `PositionNeu`/`ProduktNeu`/`Komponente` auf einen
+> Vorgang erfasst wird, **vorher** `GetGueltigeArtikelId(...)` aufrufen und bei `0` abbrechen.
+
 `PositionNeu`/`ProduktNeu`/`Komponente` referenzieren den Artikel über **Artikelnummer +
 Lagernummer**. Vor dem Erfassen prüfen, ob der Artikel dort **buchbar** ist:
 
