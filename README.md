@@ -19,8 +19,8 @@ Schreiben, Lesen und Analysieren von **A.eins-Makros** (AMIC ERP) als Claude-Cod
 Voraussetzung: Claude Code. Dann:
 
 ```bash
-# 1. Marketplace hinzufügen (Git-Repo, hier owner/repo oder Git-URL einsetzen)
-/plugin marketplace add <owner>/aeins-makro-plugin
+# 1. Marketplace hinzufügen
+/plugin marketplace add JungsSelfmadeMemory/Aeins-Makro-Skill
 
 # 2. Plugin installieren
 /plugin install aeins-makro@amic-plugins
@@ -28,7 +28,7 @@ Voraussetzung: Claude Code. Dann:
 
 Alternativen zum Repo-Bezug:
 ```bash
-/plugin marketplace add https://<git-host>/<pfad>/aeins-makro-plugin.git
+/plugin marketplace add https://github.com/JungsSelfmadeMemory/Aeins-Makro-Skill.git
 /plugin marketplace add ./aeins-makro-plugin        # lokaler Pfad zum Testen
 ```
 
