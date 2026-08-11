@@ -75,6 +75,7 @@ den Puffer parst (lesen) bzw. formatiert (schreiben):
 | 1771 | `ID_V_BEMTEXT1` | string(40) | Bemerkungstext 1 |
 | 1917 | `ID_V_LIEFDATUMVON` | DateTime | Lieferdatum von |
 | 1918 | `ID_V_LIEFDATUMBIS` | DateTime | Lieferdatum bis |
+| 469 | `ID_SV_INTERFACE` | int | Vorgang in interner Bearbeitung: **0 = User-Interface, 1 = intern** (Makro/Import/Mandantenserver) — vor `MessageBox` prüfen! |
 
 *(vollständige Liste `ID_V_*` im CSV)*
 

@@ -55,6 +55,9 @@ Das bestehende Korpus hält diese Regeln nicht durchgängig ein – sie sind die
     interne Belege (Klasse 5100..5220) → KundNr 0; VK (`<1000`) → `KundTyp IN (1,3)`; EK (`>=1000`)
     → `KundTyp IN (2,3)`; jeweils `KundLoeKennz=0 AND KundLiefSperr<=1 AND KundFaktSperr<=1`.
     Bei `0` FehlerProtokoll (Makroname + KundNr + Sperrwerte). Helfer: `assets/KM_KundeGueltig.pas`.
+11. **`MessageBox` nur am User-Interface:** vor jeder MessageBox Feld-ID **469 `ID_SV_INTERFACE`**
+    prüfen (`GetValue(iVorgang,469,sBuf,0)` → 0=UI, 1=intern/Import/Mandantenserver); bei `1` keine
+    MessageBox. Hintergrund/Kontexte: `references/makro-einbindung-kontexte.md`.
 
 ---
 
@@ -218,3 +221,6 @@ Keine offizielle Gesamtreferenz; wichtigste Kommandos:
 - `formposition-feldkatalog.md` (+ `formposition_beispiel.csv`) – Feld-ID-Katalog.
 - `marktkasse-kassenfunktionen.md` (+ `kassenfunktion_beispiel.csv`) – Kassen-Aktionen.
 - `fragenkatalog-offene-punkte.md` – noch offene Semantik-Fragen (F11/F12/F13/F15/F17 …).
+- `makro-einbindung-kontexte.md` – **Einbindung/Architektur** aus den AMIC-Schulungen:
+  Kontrollmakro (Einstiegspunkte, Bearbeitungsarten, GSKM/FAZ), Masken-/Feldmakro (Shift+F3/AIS,
+  OnSave, `Get/SetLDBArray`), Test-Unit/Nachlauf, FAI-Import/Datenstrom/Mandantenserver.

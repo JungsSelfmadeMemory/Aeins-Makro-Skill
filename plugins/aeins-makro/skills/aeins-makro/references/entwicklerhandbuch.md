@@ -92,6 +92,12 @@ aufrufen und bei Rückgabe `0` abbrechen. Details/Beispiel: Abschnitt **6f**.
 `KundeGueltig(KundNummer, Vorgangsklasse)` aufrufen und bei `0` keinen Vorgang anlegen.
 Details/Beispiel: Abschnitt **6g**.
 
+### R11 – `MessageBox` nur am User-Interface  ✅ bestätigt (Schulung)
+Vor jeder `MessageBox`/UI-Interaktion prüfen, ob User-Interface vorliegt — Feld-ID
+**469 `ID_SV_INTERFACE`**: `GetValue(iVorgang, 469, sBuf, 0)` → `0` = UI, `1` = intern
+(Makro/Import/Mandantenserver). Bei `1` **keine** MessageBox (sonst hängt der Mandantenserver).
+Hintergrund/Kontexte: [`Makro-Einbindung-Kontexte.md`](Makro-Einbindung-Kontexte.md).
+
 ---
 
 ## 1. Programmgerüst & Parameter
