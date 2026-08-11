@@ -427,6 +427,11 @@ Lagernummer**. Vor dem Erfassen prüfen, ob der Artikel dort **buchbar** ist:
 > iKlasse)` kombiniert alle drei Schritte und liefert die buchbare `ArtikelId` bzw. `0`.
 > Beispiel: `assets/KM_GetGueltigeArtikelId.pas`; eingebaut in
 > `assets/KM_ProduktionAnlegen_mitPruefung.pas`.
+>
+> **Fehlerprotokoll:** Liefert die Prüfung `0`, wird immer ein Eintrag geschrieben —
+> `FehlerProtokoll(30, <Makroname>, <Text>)`, wobei der Text die Übergabeparameter und die
+> gelesenen Artikel-Werte (ArtikelId, Fakt-/BestSperr, Ab-/BisDatum) enthält. So ist im
+> Protokoll erkennbar, **warum** ein Artikel nicht gebucht werden konnte.
 
 ---
 

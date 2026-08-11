@@ -19,6 +19,8 @@
   3. Gültigkeitszeitraum: sDatum muss zwischen ArtikelAbDatum und ArtikelBisDatum liegen.
 
  Rückgabe: ArtikelId (>0) wenn buchbar, sonst 0.
+ Bei Rückgabe 0 wird IMMER ein FehlerProtokoll-Eintrag geschrieben (Bereich = Makroname,
+ Text = Übergabeparameter + die gelesenen Artikel-Werte), damit der Grund erkennbar ist.
 
  Aufrufparameter des Testrahmens (immer string):
    p1 = Artikelnummer, p2 = Lagernummer, p3 = Datum (TT.MM.JJJJ), p4 = Vorgangsklasse
@@ -32,7 +34,8 @@
 PROGRAM KM_GetGueltigeArtikelId(p1; p2; p3; p4);
 
 CONST
-   AUTO_KOPIEREN = 1;    // 1 = fehlenden Artikel ins Ziellager kopieren, 0 = nur prüfen
+   AUTO_KOPIEREN = 1;                          // 1 = fehlenden Artikel ins Ziellager kopieren, 0 = nur prüfen
+   MAKRONAME     = "KM_GetGueltigeArtikelId";  // Bereich für Fehlerprotokoll
 
 VAR
    sMsg : STRING;
@@ -45,20 +48,28 @@ VAR
    FUNCTION GetGueltigeArtikelId(sArtNr : STRING; iLager : INTEGER;
                                  sDatum : STRING; iKlasse : INTEGER) : INTEGER;
    VAR
-      sSql       : STRING;
-      sBuf       : STRING;
-      sAb        : STRING;
-      sBis       : STRING;
-      iArtId     : INTEGER;
-      iFaktSperr : INTEGER;
-      iBestSperr : INTEGER;
-      iRes       : INTEGER;
+      sSql        : STRING;
+      sBuf        : STRING;
+      sAb         : STRING;
+      sBis        : STRING;
+      sLog        : STRING;
+      iArtId      : INTEGER;
+      iGefundenId : INTEGER;
+      iFaktSperr  : INTEGER;
+      iBestSperr  : INTEGER;
+      iRes        : INTEGER;
    BEGIN
       sSql := ALLOC(2048);
       sBuf := ALLOC(256);
       sAb  := ALLOC(64);
       sBis := ALLOC(64);
-      iArtId := 0;
+      sLog := ALLOC(2048);
+      iArtId      := 0;
+      iGefundenId := 0;
+      iFaktSperr  := 0;
+      iBestSperr  := 0;
+      STRCPY(sAb, "");
+      STRCPY(sBis, "");
 
       // --- 1) Artikel im Ziellager suchen ---
       SPRINTF(sSql, "SELECT ArtikelId"
@@ -106,7 +117,7 @@ VAR
 
       // --- 2) Sperren + 3) Gültigkeit prüfen ---
       IF iRes <> 0 THEN BEGIN
-         Get("gaid_art", "ArtikelId",        sBuf);  iArtId     := STRTOINT(sBuf);
+         Get("gaid_art", "ArtikelId",        sBuf);  iGefundenId := STRTOINT(sBuf);  iArtId := iGefundenId;
          Get("gaid_art", "ArtikelFaktSperr", sBuf);  iFaktSperr := STRTOINT(sBuf);
          Get("gaid_art", "ArtikelBestSperr", sBuf);  iBestSperr := STRTOINT(sBuf);
          Get("gaid_art", "ArtikelAbDatum",   sAb);   STRALLTRIM(sAb);
@@ -141,10 +152,21 @@ VAR
       END;
       CloseCursor("gaid_art");
 
+      // Kein buchbarer Artikel -> Fehlerprotokoll (Bereich = Makroname) mit
+      // Übergabeparametern + gaid_art-Werten, damit der Grund erkennbar ist.
+      IF iArtId = 0 THEN BEGIN
+         SPRINTF(sLog, "Kein buchbarer Artikel. Parameter: ArtNr=%s Lager=%d Datum=%s Klasse=%d"
+                       " | Artikel: ArtikelId=%d FaktSperr=%d BestSperr=%d AbDatum=%s BisDatum=%s",
+                       sArtNr, iLager, sDatum, iKlasse,
+                       iGefundenId, iFaktSperr, iBestSperr, sAb, sBis);
+         FehlerProtokoll(30, MAKRONAME, sLog);
+      END;
+
       FREE(sSql);
       FREE(sBuf);
       FREE(sAb);
       FREE(sBis);
+      FREE(sLog);
       GetGueltigeArtikelId := iArtId;          // R7: letzte Zeile, beendet die Funktion
    END;
 
