@@ -87,6 +87,11 @@ STRCPY(sBuf, sSql);              // richtig (Inhalt kopieren)
 **Immer** vor `PositionNeu`/`ProduktNeu`/`Komponente` die Funktion `GetGueltigeArtikelId(...)`
 aufrufen und bei Rückgabe `0` abbrechen. Details/Beispiel: Abschnitt **6f**.
 
+### R10 – KundNummer-Prüfung vor StartVorgang ist Pflicht  ✅ bestätigt
+**Immer** vor `StartVorgang` (bzw. im `CVorgangsHelper` vor `jppex "StartVorgang"`)
+`KundeGueltig(KundNummer, Vorgangsklasse)` aufrufen und bei `0` keinen Vorgang anlegen.
+Details/Beispiel: Abschnitt **6g**.
+
 ---
 
 ## 1. Programmgerüst & Parameter
@@ -439,6 +444,27 @@ Lagernummer**. Vor dem Erfassen prüfen, ob der Artikel dort **buchbar** ist:
 > `FehlerProtokoll(30, <Makroname>, <Text>)`, wobei der Text die Übergabeparameter und die
 > gelesenen Artikel-Werte (ArtikelId, Fakt-/BestSperr, Ab-/BisDatum) enthält. So ist im
 > Protokoll erkennbar, **warum** ein Artikel nicht gebucht werden konnte.
+
+### 6g. KundNummer-Prüfung vor StartVorgang — PFLICHT  ✅ verifiziert (Korpus/Regel)
+> **Regel:** **Immer** vor `StartVorgang` bzw. im `CVorgangsHelper` (vor `jppex "StartVorgang"`)
+> `KundeGueltig(KundNummer, Vorgangsklasse)` aufrufen und bei `0` keinen Vorgang anlegen.
+
+Zulässige KundNummer je Vorgangsklasse:
+- **Interne Belege (Klasse 5100..5220):** KundNummer **muss 0** sein.
+- **Verkauf (`V_Klassnummer < 1000`):** Debitor → `KundTyp IN (1,3)`.
+- **Einkauf (`V_Klassnummer >= 1000`):** Kreditor → `KundTyp IN (2,3)`.
+- In VK/EK zusätzlich: `KundLoeKennz = 0` **und** `KundLiefSperr <= 1` **und** `KundFaktSperr <= 1`.
+
+```pascal
+// Verkauf: KundTyp IN (1,3); Einkauf: KundTyp IN (2,3)
+SELECT KundTyp, KundLoeKennz, KundFaktSperr, KundLiefSperr
+  FROM Kundenstamm WHERE KundNummer = <nr>
+// erlaubt, wenn: KundLoeKennz=0 AND KundLiefSperr<=1 AND KundFaktSperr<=1 AND KundTyp passend
+```
+> **Fehlerprotokoll:** Ist die KundNummer nicht erlaubt (oder Kunde nicht gefunden), schreibt die
+> Prüfung `FehlerProtokoll(30, <Makroname>, <Text>)` mit der KundNummer und den Werten
+> `KundLoeKennz`, `KundFaktSperr`, `KundLiefSperr` (+ `KundTyp`). Helfer + Beispiel:
+> `assets/KM_KundeGueltig.pas`, eingebaut in `assets/KM_AuftraegeGenerieren.pas`.
 
 ---
 

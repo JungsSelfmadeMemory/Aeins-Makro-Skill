@@ -32,6 +32,7 @@ CONST
    MENGE_MAX      = 99;     // Zufallsmenge obere Grenze
    ID_V_DATUM     = 103;    // Kopffeld Vorgangsdatum (DateTime), Format TT.MM.JJJJ
    HDL            = "vh";   // frei gewaehlter JPP-Objekt-Handle
+   MAKRONAME      = "KM_AuftraegeGenerieren";   // Bereich für Fehlerprotokoll
 
 VAR
    sSql        : STRING;
@@ -128,6 +129,68 @@ VAR
       iRet := JPPEX(sHdl, "SetValue");                 // Kopffeld setzen
    END;
 
+   /*--- R10: KundNummer je Vorgangsklasse prüfen (1=erlaubt, 0=nicht).
+        Interne Belege 5100..5220 -> KundNr muss 0 sein; VK (<1000) Debitor
+        KundTyp IN (1,3); EK (>=1000) Kreditor KundTyp IN (2,3); jeweils
+        KundLoeKennz=0, KundLiefSperr<=1, KundFaktSperr<=1. Bei 0 -> Fehlerprotokoll. ---*/
+   FUNCTION KundeGueltig(iKundNr : INTEGER; iKlasse : INTEGER) : INTEGER;
+   VAR
+      sKgSql  : STRING;
+      sKgBuf  : STRING;
+      sKgLog  : STRING;
+      iKgRes  : INTEGER;
+      iErl    : INTEGER;
+      iTyp    : INTEGER;
+      iLoe    : INTEGER;
+      iFakt   : INTEGER;
+      iLief   : INTEGER;
+   BEGIN
+      sKgSql := ALLOC(1024);
+      sKgBuf := ALLOC(256);
+      sKgLog := ALLOC(1024);
+      iErl := 0;  iTyp := -1;  iLoe := 0;  iFakt := 0;  iLief := 0;
+
+      IF (iKlasse >= 5100) AND (iKlasse <= 5220) THEN BEGIN
+         IF iKundNr = 0 THEN BEGIN
+            iErl := 1;
+         END;
+      END ELSE BEGIN
+         SPRINTF(sKgSql, "SELECT KundTyp"
+                         "     , KundLoeKennz"
+                         "     , KundFaktSperr"
+                         "     , KundLiefSperr"
+                         "  FROM Kundenstamm"
+                         " WHERE KundNummer = %d", iKundNr);
+         iKgRes := SELECT("kg_kunde", sKgSql);
+         IF iKgRes <> 0 THEN BEGIN
+            Get("kg_kunde", "KundTyp",       sKgBuf);  iTyp  := STRTOINT(sKgBuf);
+            Get("kg_kunde", "KundLoeKennz",  sKgBuf);  iLoe  := STRTOINT(sKgBuf);
+            Get("kg_kunde", "KundFaktSperr", sKgBuf);  iFakt := STRTOINT(sKgBuf);
+            Get("kg_kunde", "KundLiefSperr", sKgBuf);  iLief := STRTOINT(sKgBuf);
+            IF (iLoe = 0) AND (iLief <= 1) AND (iFakt <= 1) THEN BEGIN
+               IF iKlasse < 1000 THEN BEGIN
+                  IF (iTyp = 1) OR (iTyp = 3) THEN BEGIN  iErl := 1;  END;
+               END ELSE BEGIN
+                  IF (iTyp = 2) OR (iTyp = 3) THEN BEGIN  iErl := 1;  END;
+               END;
+            END;
+         END;
+         CloseCursor("kg_kunde");
+      END;
+
+      IF iErl = 0 THEN BEGIN
+         SPRINTF(sKgLog, "Ungültige KundNummer %d (Klasse %d): KundLoeKennz=%d KundFaktSperr=%d"
+                         " KundLiefSperr=%d KundTyp=%d",
+                         iKundNr, iKlasse, iLoe, iFakt, iLief, iTyp);
+         FehlerProtokoll(30, MAKRONAME, sKgLog);
+      END;
+
+      FREE(sKgSql);
+      FREE(sKgBuf);
+      FREE(sKgLog);
+      KundeGueltig := iErl;
+   END;
+
 BEGIN
    Init();
 
@@ -141,6 +204,9 @@ BEGIN
 
       WHILE iKundNr <> 0 DO BEGIN
          iLastKund := iKundNr;
+
+         // --- R10: KundNummer vor StartVorgang prüfen (Auftrag = VK) ---
+         IF KundeGueltig(iKundNr, KLASSE_AUFTRAG) = 1 THEN BEGIN
 
          // --- Auftragskopf ---
          iRet := JPPINI(sHdl, "KundNummer",  iKundNr);
@@ -177,6 +243,8 @@ BEGIN
             JPPDO(sHdl, "BeendeVorgang", sErgebnis, 64);
             iAnzAuftrag := iAnzAuftrag + 1;
          END;
+
+         END;   // Ende R10-Prüfung (KundeGueltig) - bei 0 wurde Kunde übersprungen
 
          // naechster Kunde (Cursor der Abfrage ist bereits geschlossen)
          iKundNr := GetNaechsterKunde(iLastKund);

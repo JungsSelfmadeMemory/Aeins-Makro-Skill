@@ -50,6 +50,11 @@ Das bestehende Korpus hält diese Regeln nicht durchgängig ein – sie sind die
    an einen String ist `sBuf := ALLOC(n);`.
 9. **Artikel-Prüfung vor dem Erfassen ist Pflicht:** vor jedem `PositionNeu`/`ProduktNeu`/
    `Komponente` `GetGueltigeArtikelId(...)` aufrufen, bei `0` abbrechen (s. Abschnitt unten).
+10. **KundNummer-Prüfung vor StartVorgang ist Pflicht:** vor `StartVorgang`/`CVorgangsHelper`
+    `KundeGueltig(KundNummer, Vorgangsklasse)` aufrufen, bei `0` keinen Vorgang anlegen. Regel:
+    interne Belege (Klasse 5100..5220) → KundNr 0; VK (`<1000`) → `KundTyp IN (1,3)`; EK (`>=1000`)
+    → `KundTyp IN (2,3)`; jeweils `KundLoeKennz=0 AND KundLiefSperr<=1 AND KundFaktSperr<=1`.
+    Bei `0` FehlerProtokoll (Makroname + KundNr + Sperrwerte). Helfer: `assets/KM_KundeGueltig.pas`.
 
 ---
 
