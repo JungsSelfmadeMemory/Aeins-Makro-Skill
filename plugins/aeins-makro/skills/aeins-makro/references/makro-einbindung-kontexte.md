@@ -131,6 +131,9 @@ zeigt den Control-String (steht dort `^makro`/`^jpl … pascal`, ist es ein Makr
 | `Umsetzen(typ, sEin, sErg)` **(?)** | Umschlüsselung über Schlüsselklassen (Importumsetzer `IPIMPUM`) |
 | `EscapeState := 0` | Makroabbruch per Escape zur Laufzeit zulassen |
 | `StringAllTrim` / `StringLTrim` / `StringRTrim` | Strings trimmen (DB-Strings haben oft Leerzeichen) |
+| `InitGetId` | Auswahllisten-Zugriff initiieren; Rückgabe **1 = ok, 0 = fehlgeschlagen** (keine Auswahlliste da) |
+| `AWGetSelectCount` **(?)** | Anzahl **markierter** Datensätze; vor Massenaktionen `> 0` prüfen (gegen „nichts markiert = alles markiert") |
+| `GetNextIdString` / `GetIdxString` **(?)** | String-Pendants zu `GetNextId`/`GetIdx(n)`, wenn der Ident ein **String** ist (Rückgabe 0/1 prüfen) |
 
 ## 7. Wichtige Regeln & Gotchas aus den Schulungen
 
@@ -150,7 +153,61 @@ zeigt den Control-String (steht dort `^makro`/`^jpl … pascal`, ist es ein Makr
 - **„Nichts markiert = alles markiert"** – vor Lösch-/Änderungsaktionen die Anzahl markierter
   Datensätze prüfen.
 - **`REPEAT … UNTIL Fetch/GetNextId <> 0`** ist ein bekannter, bewusster „Designfehler" der
-  Sprache („müssen wir mit leben") — deckt sich mit dem korpusweit verwendeten Idiom.
+  Sprache („müssen wir mit leben") — deckt sich mit dem korpusweit verwendeten Idiom. (Betrifft
+  sowohl die Fetch-Schleife als auch die Auswahllisten-Schleife `UNTIL iGrundId <> 0`.)
+- **`StrCopy(sZiel, quelle)`-NULL-Falle:** ist die **Quelle NULL** (z. B. NULL-bares DB-Feld),
+  bleibt der **alte Wert** in `sZiel` stehen (nicht leer!). → Zielvariable vor dem Auslesen
+  NULL-barer Felder immer auf leer setzen (`STRCPY(sZiel,"")`).
+- **`SPRINTF`-Platzhalter passend zum Typ:** `%d`=Integer, `%s`=String, `%f`=Real. Typ und
+  Platzhalter vertauschen (`%s` ↔ Integer) → Fehlverhalten/Absturz.
+
+## 9. Entwicklungsumgebung, Transport & Werkzeuge (Erst-Schulung)
+
+**Customizing-/Entwicklungslandschaft (Einordnung):** AIS (Maskenmanipulation) + Sprachen nach
+Alter: **Makro (älteste, meistgenutzt) → VBA → C# → Python (geplant)**. VBA ist veraltet, aber
+**nicht abgekündigt**; **C# soll im Consulting nicht eingesetzt werden** (nur wenn Makro/VBA an
+Grenzen stoßen). **Grundsatz: erst prüfen, ob der Standard es kann.**
+
+**Editor einrichten (Direktsprung `OPT`):**
+- Externer Editor (z. B. Notepad++) ist **bedienerspezifisch** wählbar; die EXE muss im PATH
+  liegen. Änderung greift erst nach **komplettem Neustart** von A.eins. Der Editor wird
+  **synchron** gestartet (A.eins wartet, bis er geschlossen ist → Tab/Datei vorher speichern).
+- **⚠ Pflicht-Einstellung: Dateinamen-Präfix aktivieren.** Standardmäßig heißt jede Makrodatei
+  beim Editieren `IMP_Run.pas`. In **mehreren Datenbanken** überschreiben sich Makros so
+  gegenseitig. Mit der Option wird eine **DB-Kennung vor den Dateinamen + Makroname** gehängt.
+  „Hat schon 500-Zeilen-Makros zerschossen."
+
+**Versionsverwaltung im Makro-Editor:** „Version speichern" (vor jeder Änderung), „Version
+vergleichen" (Diff via **WinMerge**), „Version wiederherstellen". Bekannter Bug: WinMerge wird
+bei Neuinstallation z. T. **nicht ins BIN** ausgeliefert → „Vergleichen" funktioniert dann nicht
+(WinMerge manuell ins BIN kopieren).
+
+**Makro-Transport zwischen Mandanten/DBs:**
+- **NICHT** über „Skript-Export"/OSQL — der Export arbeitet hart über die **Script-ID**; IDs
+  kollidieren zwischen DBs und werden **gnadenlos überschrieben**.
+- **Korrekt:** Makro **„Datei entladen"** → im Ziel neu anlegen → **„Aus Datei laden"** (bzw.
+  Text in den Editor kopieren). In der Auswahlliste öffnet **Shift+F6** den Editor mit dem
+  Makronamen als Dateiname. *(Ausblick: künftige Version zieht die Script-ID über den Makronamen
+  → dann wieder zuverlässig per OSQL.)*
+
+**Auditing/Änderungsprotokoll (Direktsprung `SUPP`, Variante „Protokoll"):** zeigt mit Zeitstempel
+und Bediener, welche DB-Objekte geändert wurden (Makros mit ID, Trigger, Prozeduren, AIS/Formate,
+Steuer-/Einrichterparameter, Varianten). Dahinter Tabelle **`Supporterprotokoll`**, Spalte
+**`ChangeSet`** (XML) = **vorherige Definition** des Objekts (ansehbar, aber derzeit **nicht**
+automatisch wiederherstellbar). Nutzen: „ging bis vor 5 Tagen" → nachsehen, wer was geändert hat.
+
+**Makro-Debugger (Direktsprung `MDBG`):** „Debugger umschalten" verbindet/trennt; Durchsteppen
+zeigt **Variablenwerte pro Zeile**. Warnungen wie **„nicht abgeräumter Speicher"** (mit
+Zeilennummer, Klick springt hin), „ungültiger Makrostring", „Ausnahme bei Free". **Empfehlung:
+jedes Makro einmal komplett durchsteppen — am Ende sollte nur „Makroende" stehen.**
+
+**Makro schnell testen:** im **OSQL** (nicht ISQL) den JPL-String eintragen:
+`^makro <Makroname> "P1" P2 …`. Einbinden als **Private Funktion** (Direktsprung **Shift+F4**,
+Name beginnt mit `PF`, Control-String `^makro <Name>`), optional als Menüfunktion/Direktsprung.
+
+**Konstanten:** Zuweisung mit `=` (nicht `:=`); dürfen — anders als Variablen — **Strings direkt**
+erhalten. Typische Nutzung: Message-Box-Titel, Debug-Schalter (`CI_DEBUG = 0/1`), sprechende
+Feld-ID-Namen (`CID_MENGE = 1000`).
 
 ## 8. Noch zu verifizieren / offen
 
