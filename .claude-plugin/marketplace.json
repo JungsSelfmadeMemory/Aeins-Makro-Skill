@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "amic-plugins",
+  "owner": {
+    "name": "AMIC",
+    "email": "karsten.jung@amic.de"
+  },
+  "description": "Interne AMIC-Plugins für Claude Code (A.eins-Entwicklung).",
+  "plugins": [
+    {
+      "name": "aeins-makro",
+      "source": "./plugins/aeins-makro",
+      "description": "A.eins-Makros schreiben, lesen und analysieren – Konventionen, Feld-ID-Katalog, Vorgänge/CVorgangsHelper, CtrlString/AIS, Marktkasse, Makro-Export.",
+      "category": "development",
+      "keywords": ["aeins", "amic", "makro", "erp"]
+    }
+  ]
+}

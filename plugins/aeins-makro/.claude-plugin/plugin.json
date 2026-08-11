@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "aeins-makro",
+  "description": "A.eins-Makros (AMIC ERP) schreiben, lesen und analysieren: Hausregeln, Feld-ID-Katalog (FormPosition), Vorgänge/CVorgangsHelper, CtrlString/AIS, Marktkasse und Makro-Export.",
+  "author": {
+    "name": "AMIC",
+    "email": "karsten.jung@amic.de"
+  },
+  "keywords": ["aeins", "amic", "makro", "erp", "pascal", "sql-anywhere"]
+}
