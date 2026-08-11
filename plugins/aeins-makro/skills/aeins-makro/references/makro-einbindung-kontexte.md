@@ -67,8 +67,9 @@ zeigt den Control-String (steht dort `^makro`/`^jpl … pascal`, ist es ein Makr
 (ohne Index: `GetLDB`/`SetLDB`). Feldnamen/Werte einer Maske anzeigen: **Strg+Shift+F5**
 (z. B. `H.Kundennummer$` mit Array-Index). **Groß-/Kleinschreibung der Feldnamen ist relevant.**
 - **Numerikfelder** liefern/erwarten das **deutsche Anzeigeformat** (Tausenderpunkt, Komma).
-  Zum Rechnen umwandeln (Punkt raus, Komma→Punkt, dann `StrToReal`); zum Setzen selbst
-  formatieren via `AmicNumericToString(wert, nachk, tausender, dezimal)` **(?)**.
+  Zum Rechnen umwandeln (Punkt raus, Komma→Punkt, dann `StrToReal`); zum Setzen selbst ins
+  deutsche Format bringen — im Korpus via SQL-Proc `p_GS_NumericToString(wert, nachk)`
+  (GS-/kundenspezifisch, per `GetDBWert`).
 - **Datumsfelder** auf Masken im **deutschen Format mit Punkt** setzen (mit Minus wird nicht
   gesetzt); für DB-Vergleiche Punkte→Minus ersetzen.
 
@@ -125,15 +126,15 @@ zeigt den Control-String (steht dort `^makro`/`^jpl … pascal`, ist es ein Makr
 | `GetLDBArray` / `SetLDBArray`, `GetLDB` / `SetLDB` | Maskenfelder lesen/setzen (mit/ohne Array-Index) |
 | `SQL("…")` + `commit;` | Datenänderung; `commit` als Makro-Kurzform ODER `SQL("commit")` |
 | `SQL("rollback")` | Rollback — **nur** als SQL-Statement möglich |
-| `DBSetErrorDisplay(0/1)` **(?)** | SQL-Fehlermeldungen unterdrücken/wieder anzeigen |
-| `DBLastError()` **(?)** | Fehlercode des letzten DB-Befehls (0 = ok) |
-| `AmicNumericToString(wert,nachk,taus,dez)` **(?)** | Zahl → deutsches Anzeigeformat (`2400`→`2.400,00`) |
-| `Umsetzen(typ, sEin, sErg)` **(?)** | Umschlüsselung über Schlüsselklassen (Importumsetzer `IPIMPUM`) |
-| `EscapeState := 0` | Makroabbruch per Escape zur Laufzeit zulassen |
+| `DBSetErrorDisplay(flag)` | SQL-Fehlermeldungen aus (`0`) / an (`1`) — Prozedur |
+| `DBError() : integer` | Fehlercode der letzten DB-Anweisung (**0 = kein Fehler**) |
+| `p_GS_NumericToString(wert, nachk)` | Zahl → deutsches Anzeigeformat, **SQL-Proc** (via `GetDBWert`); GS-/kundenspezifisch |
+| `Umsetzen(typ, sEin, sErg)` | Umschlüsselung über Schlüsselklassen (Importumsetzer `IPIMPUM`) |
+| `EscState(state) : integer` | ESC-Modus: `0` = unterbricht Makro (Standard), `1` = abgefragt ohne Unterbrechung, `2` = ESC nicht abgefragt; liefert alten Status |
 | `StringAllTrim` / `StringLTrim` / `StringRTrim` | Strings trimmen (DB-Strings haben oft Leerzeichen) |
 | `InitGetId` | Auswahllisten-Zugriff initiieren; Rückgabe **1 = ok, 0 = fehlgeschlagen** (keine Auswahlliste da) |
-| `AWGetSelectCount` **(?)** | Anzahl **markierter** Datensätze; vor Massenaktionen `> 0` prüfen (gegen „nichts markiert = alles markiert") |
-| `GetNextIdString` / `GetIdxString` **(?)** | String-Pendants zu `GetNextId`/`GetIdx(n)`, wenn der Ident ein **String** ist (Rückgabe 0/1 prüfen) |
+| `AWGetSelCount() : integer` | Anzahl **markierter** Zeilen (-1 = Fehler); vor Massenaktionen `> 0` prüfen (gegen „nichts markiert = alles markiert") |
+| `GetNextIdStr(buf)` / `GetIdxStr(n, buf)` | String-Pendants zu `GetNextId`/`GetIdx(n)`, wenn der Ident ein **String** ist (Rückgabe 0/1 prüfen) |
 
 ## 7. Wichtige Regeln & Gotchas aus den Schulungen
 
@@ -211,8 +212,15 @@ Feld-ID-Namen (`CID_MENGE = 1000`).
 
 ## 8. Noch zu verifizieren / offen
 
-- Genaue Namen/Signaturen der mit **(?)** markierten Funktionen (`AmicNumericToString`,
-  `DBLastError`, `DBSetErrorDisplay`, `Umsetzen`, Datenstrom-Status-Prozedur).
+> **✅ Namen verifiziert** (Korpus + Makrobibliothek.chm): `AWGetSelCount()`, `EscState(state)`,
+> `DBError()`, `DBSetErrorDisplay(flag)`, `Umsetzen(typ,in,out)`, `GetNextIdStr`/`GetIdxStr`,
+> `GetLDBArray`/`SetLDBArray`, `GetLDB`/`SetLDB`. Zahl-Formatierung erfolgt über die SQL-Proc
+> `p_GS_NumericToString` (kein Makro-Builtin `AmicNumericToString`). `GetLDBRE`/`SetLDBRE`
+> existieren nicht (Verhörer).
+
+Weiterhin offen:
+- Exakte **Datenstrom-Status-Prozedur** (Status `12`) und deren Name.
 - `OnSaveValid`-Verhalten (verhindert es das Verlassen oder greift es erst nach dem Speichern?) —
   im Live-Test der Schulung unklar geblieben.
 - Zusätzliche Kontrollmakro-Einstiegspunkte (nach Teildispo, nach Stapelverarbeitung).
+- Name/Ort der OPT-Dateinamen-Präfix-Option; automatische Wiederherstellung aus `Supporterprotokoll`.
