@@ -121,6 +121,13 @@ Kopf **und** Position teilen die Tabelle. Lookup:
   109 `ID_V_ID`, 1000 `ID_PREIS`, 1001 `ID_MENGE`, 1002 `ID_ARTIKELID`, 1272 `ID_V_DATUM_PLAN`,
   1439 `ID_WABEWPLANDAT`, **7100 `ID_GUID`**.
 
+**Artikel-Prüfung vor dem Erfassen:** `PositionNeu`/`ProduktNeu`/`Komponente` referenzieren den
+Artikel über **Artikelnummer + Lagernummer**. Vorher prüfen (Helfer `GetGueltigeArtikelId`, s.
+`assets/`): (1) existiert der Artikel im Ziellager, sonst `call AMIC_ArtikelKopie(ArtikelId,
+Lager)`; (2) Sperre je Vorgangsklasse: **`V_Klassnummer < 1000` = Verkauf → `ArtikelFaktSperr`**,
+**`>= 1000` = Einkauf UND interne Belege (Produktion/Umbuchung wie Einkauf) → `ArtikelBestSperr`**;
+(3) Belegdatum zwischen `ArtikelAbDatum`..`ArtikelBisDatum`. Rückgabe = buchbare `ArtikelId` bzw. `0`.
+
 **Addon-Felder (`…ByName`):** Zusatzfelder in Addon-Tabellen über Basis-ID + Spaltenname.
 Position → `WarenBewegungAddon`, Basis-ID **425 `ID_WARENBEWEGUNG_ADDON`** (string):
 `SetValPosByName(iWaPos, 425, sWert, "ProdAuftragNummer")` /

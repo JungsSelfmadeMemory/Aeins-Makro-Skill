@@ -408,6 +408,26 @@ gelesener Wert (String → Zahlen/Datum mit `SPRINTF`); letzter Parameter = **Sp
 
 > Die Addon-Spalte muss in der Ziel-DB existieren (`SELECT * FROM WarenBewegungAddon`).
 
+### 6f. Artikel-Prüfung vor dem Erfassen  ✅ verifiziert (Korpus)
+`PositionNeu`/`ProduktNeu`/`Komponente` referenzieren den Artikel über **Artikelnummer +
+Lagernummer**. Vor dem Erfassen prüfen, ob der Artikel dort **buchbar** ist:
+
+1. **Existenz im Ziellager** (Muster `CheckArtikel`): gibt es `Artikel` mit dieser
+   `Artikelnummer` + `Lagernummer` (`ArtikelLoeKennz = 0`)? Wenn nicht, ggf. aus einem anderen
+   Lager kopieren: `call AMIC_ArtikelKopie(ArtikelId, Lagernummer)`.
+2. **Klassenabhängige Sperre** (Muster `JRC_VorgangImport.ArtikelCheck`) — nach
+   Vorgangsklassen-Bereich:
+   - **`V_Klassnummer < 1000` = Verkauf** → `Artikel.ArtikelFaktSperr` darf nicht `1` sein.
+   - **`V_Klassnummer >= 1000` = Einkauf UND interne Belege** (Produktion/Umbuchung werden
+     **wie Einkauf** behandelt) → `Artikel.ArtikelBestSperr` darf nicht `1` sein.
+3. **Gültigkeitszeitraum:** Belegdatum muss zwischen `ArtikelAbDatum` und `ArtikelBisDatum`
+   liegen.
+
+> **Wiederverwendbar:** Die Helferfunktion `GetGueltigeArtikelId(sArtNr, iLager, sDatum,
+> iKlasse)` kombiniert alle drei Schritte und liefert die buchbare `ArtikelId` bzw. `0`.
+> Beispiel: `assets/KM_GetGueltigeArtikelId.pas`; eingebaut in
+> `assets/KM_ProduktionAnlegen_mitPruefung.pas`.
+
 ---
 
 ## 7. JPP-Objekte (`JPP_im_Makro`)
