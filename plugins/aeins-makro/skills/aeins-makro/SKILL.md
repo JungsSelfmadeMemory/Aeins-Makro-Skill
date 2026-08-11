@@ -121,6 +121,13 @@ Kopf **und** Position teilen die Tabelle. Lookup:
   109 `ID_V_ID`, 1000 `ID_PREIS`, 1001 `ID_MENGE`, 1002 `ID_ARTIKELID`, 1272 `ID_V_DATUM_PLAN`,
   1439 `ID_WABEWPLANDAT`, **7100 `ID_GUID`**.
 
+**Addon-Felder (`…ByName`):** Zusatzfelder in Addon-Tabellen über Basis-ID + Spaltenname.
+Position → `WarenBewegungAddon`, Basis-ID **425 `ID_WARENBEWEGUNG_ADDON`** (string):
+`SetValPosByName(iWaPos, 425, sWert, "ProdAuftragNummer")` /
+`GetValPosByName(iWaPos, 425, sWert, "ProdAuftragNummer")`. Wert immer String; letzter Parameter =
+Spaltenname in `WarenBewegungAddon` (installationsspezifisch). Kopf-Analogon: `SetValueByName`/
+`GetValueByName` auf `VorgangAddon`.
+
 **Versionierung / stabile Referenzen:** `BeendeVorgang` liefert `V_ID` (integer). **Jede
 Bearbeitung erzeugt eine neue `V_ID`** → aktueller Stand über Join auf `VorgReservierung.V_Id`.
 Dauerhafte Referenz = **GUID** (Feld-ID 7100): `GetValue(…,7100,…)`→`V_GUID`,

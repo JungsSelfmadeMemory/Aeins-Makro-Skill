@@ -104,6 +104,13 @@ den Puffer parst (lesen) bzw. formatiert (schreiben):
 > Kopf-Kontext (`GetValue`) die `V_GUID`, im Positions-Kontext (`GetValPos`) die
 > `WaBew_GUID`. `V_ID`/`WaBewId` ändern sich beim Bearbeiten (siehe Vorgang-Versionierung).
 
+> **Addon-Felder:** ID **425** (`ID_WARENBEWEGUNG_ADDON`, string) ist die **Basis-ID** für die
+> Zusatzfelder der Tabelle `WarenBewegungAddon`. Nicht direkt, sondern per **`…ByName`** mit
+> Spaltenname setzen/lesen:
+> `SetValPosByName(iWaPos, 425, sWert, "<Spaltenname>")` /
+> `GetValPosByName(iWaPos, 425, sWert, "<Spaltenname>")`. Kopf-Analogon: `Set/GetValueByName`
+> auf `VorgangAddon`.
+
 ---
 
 ## 5. Beispiel

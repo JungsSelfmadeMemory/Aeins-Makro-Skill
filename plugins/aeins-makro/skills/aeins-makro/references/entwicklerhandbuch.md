@@ -384,6 +384,30 @@ STRCPY(sSql, "SELECT DATEFORMAT("
 GetDBWert(sDatum, sSql);      // z. B. "25.07.2026"
 ```
 
+### 6e. Addon-Felder (`…ByName`)  ✅ verifiziert (Korpus)
+Zusatz-/Erweiterungsfelder liegen in Addon-Tabellen und werden **nicht** über eine eigene
+Feld-ID je Spalte gesetzt, sondern **generisch über eine Basis-ID + den Spaltennamen**:
+
+- **Position → `WarenBewegungAddon`:** Basis-ID **425 `ID_WARENBEWEGUNG_ADDON`** (string).
+```pascal
+CONST ID_WARENBEWEGUNG_ADDON = 425;
+// Schreiben (Wert IMMER String):
+STRCPY(sWert, "12345");
+SetValPosByName(iWaPos, ID_WARENBEWEGUNG_ADDON, sWert, "ProdAuftragNummer");
+// Lesen:
+STRCPY(sWert, "");
+GetValPosByName(iWaPos, ID_WARENBEWEGUNG_ADDON, sWert, "ProdAuftragNummer");
+```
+Parameter: `iWaPos` = Positions-Referenz (aus `PositionNeu`/`ProduktNeu`/`Komponente` bzw.
+`GetFirstWaPos`/`GetNextWaPos`); `425` = Basis-ID aus `FormPosition`; `sWert` = zu setzender/
+gelesener Wert (String → Zahlen/Datum mit `SPRINTF`); letzter Parameter = **Spaltenname in
+`WarenBewegungAddon`** (installationsspezifisch, z. B. `"PartieMHD"`, `"PartieChargenNummer"`,
+`"ZugangsOrt"`, `"StickstoffProzent"`).
+
+- **Kopf → `VorgangAddon`:** analog `SetValueByName`/`GetValueByName` mit Vorgangs-Referenz.
+
+> Die Addon-Spalte muss in der Ziel-DB existieren (`SELECT * FROM WarenBewegungAddon`).
+
 ---
 
 ## 7. JPP-Objekte (`JPP_im_Makro`)
