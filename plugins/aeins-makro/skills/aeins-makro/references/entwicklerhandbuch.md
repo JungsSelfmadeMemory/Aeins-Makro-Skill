@@ -12,7 +12,7 @@ Diese vier Regeln gelten für **alles**, was ich neu schreibe:
 
 ### R1 – Variablen-Präfix nach Datentyp  ✅ bestätigt
 Jeder Variablenname beginnt mit einem Kleinbuchstaben, der den Datentyp anzeigt;
-der Rest des Namens ist CamelCase (`sBelegNr`, `hVorgang`).
+der Rest des Namens ist CamelCase (`sBelegNr`, `iVorgang`).
 
 | Präfix | Typ | Beispiel |
 |---|---|---|
@@ -21,7 +21,10 @@ der Rest des Namens ist CamelCase (`sBelegNr`, `hVorgang`).
 | `r` | real | `rMenge`, `rPreis` |
 | `d` | date | `dLiefer` |
 | `b` | boolean | `bGefunden` |
-| `h` | Handle (integer) | `hVorgang`, `hWaPos` |
+
+> **Kein `h`-Präfix:** Handles/Referenzen (Vorgang, Position, Produkt …, z. B. Rückgaben von
+> `StartVorgang`/`LadeVorgangId`/`ProduktNeu`/`GetFirstWaPos`) sind Integer und beginnen mit
+> `i` (`iVorgang`, `iWaPos`, `iProdukt`).
 
 ### R2 – Schlüsselwörter GROSS
 `PROGRAM, CONST, VAR, BEGIN, END, IF, THEN, ELSE, WHILE, DO, REPEAT, UNTIL, CASE, PROCEDURE, FUNCTION` – immer groß. SQL-Schlüsselwörter (`SELECT, FROM, JOIN, WHERE, ORDER BY …`) ebenfalls groß.
@@ -148,7 +151,7 @@ Verschachtelte Prozeduren sind erlaubt (Beispiel `AMIC_SV_RohErtrag.CalcEkKosten
 
 Beispiel (aus `AMIC_SV_RohErtrag`, auf Regeln umgeschrieben):
 ```pascal
-GetValue(hVorgang, ID_JAHRNUMMER, sBuf, 0);
+GetValue(iVorgang, ID_JAHRNUMMER, sBuf, 0);
 iJahr := STRTOINT(sBuf);
 SPRINTF(sSql, "SELECT AMIC_BEWERTUNGSPREIS(%d,%d,%d,-1) AS wert", iArtikel, iJahr, iPeriode);
 GetDBWert(sWert, sSql);
@@ -166,9 +169,9 @@ END ELSE BEGIN
    ...
 END;
 
-WHILE hWaPos <> 0 DO BEGIN
+WHILE iWaPos <> 0 DO BEGIN
    ...
-   hWaPos := GetNextWaPos(hVorgang);
+   iWaPos := GetNextWaPos(iVorgang);
 END;
 
 REPEAT BEGIN
@@ -285,18 +288,18 @@ CONST
    ID_WUNSCHLIEFERDAT = 1272;   // Kopf   (Beispiel)
    ID_PLANDATUM_POS   = 1439;   // Position
 VAR
-   hVorgang, hWaPos : INTEGER;
+   iVorgang, iWaPos : INTEGER;
    sDatum           : STRING;
 BEGIN
    sDatum := ALLOC(1024);
 
-   GetValue(hVorgang, ID_WUNSCHLIEFERDAT, sDatum, 0);   // Kopf lesen  (4. Arg = Instanzindex, s.u.)
+   GetValue(iVorgang, ID_WUNSCHLIEFERDAT, sDatum, 0);   // Kopf lesen  (4. Arg = Instanzindex, s.u.)
    STRALLTRIM(sDatum);
 
-   hWaPos := GetFirstWaPos(hVorgang);                    // Positionen iterieren
-   WHILE hWaPos <> 0 DO BEGIN
-      SetValPos(hWaPos, ID_PLANDATUM_POS, sDatum, 0);    // Positionsfeld schreiben
-      hWaPos := GetNextWaPos(hVorgang);                  // 0 = keine weitere Position
+   iWaPos := GetFirstWaPos(iVorgang);                    // Positionen iterieren
+   WHILE iWaPos <> 0 DO BEGIN
+      SetValPos(iWaPos, ID_PLANDATUM_POS, sDatum, 0);    // Positionsfeld schreiben
+      iWaPos := GetNextWaPos(iVorgang);                  // 0 = keine weitere Position
    END;
 
    FREE(sDatum);
@@ -368,7 +371,7 @@ Vollständiges Praxis-Makro: [`KM_AuftraegeGenerieren.pas`](KM_AuftraegeGenerier
 - **Jede Bearbeitung erzeugt eine neue `V_ID`** (Server bucht alt zurück, neu positiv).
   Aktueller Stand nur über Join auf **`VorgReservierung.V_Id`**.
 - **Dauerhafte Referenz = GUID**, Feld-ID **7100 `ID_GUID`**:
-  `GetValue(hVorg,7100,buf,0)` → `V_GUID` (Kopf), `GetValPos(hWaPos,7100,buf,0)` →
+  `GetValue(iVorg,7100,buf,0)` → `V_GUID` (Kopf), `GetValPos(iWaPos,7100,buf,0)` →
   `WaBew_GUID` (Position). `WaBewId` wechselt ebenfalls beim Bearbeiten → nie als Referenz.
 - **`Vorgangaddon`** (Join über `V_ID`) hält oft individuelle/kundenspezifische Felder.
 
@@ -393,7 +396,7 @@ BEGIN
    IF JPPNEW(PHDL, "CVorgangsHelper") = 1 THEN BEGIN
       IF JPPEX(PHDL, "CatchSVMAIN") = 1 THEN BEGIN     // Methode ausführen (bool)
          JPPDO(PHDL, "GetVorgangHandle", sBuf, 200);   // Methode mit Rückgabe in Puffer
-         hVorgang := STRTOINT(sBuf);
+         iVorgang := STRTOINT(sBuf);
          ...
       END ELSE BEGIN
          MessageBox("SVMAIN-Kontext nicht gefunden.", "!", 1);

@@ -31,7 +31,9 @@ Feldkatalog, Marktkasse, offene Punkte).
 Das bestehende Korpus hält diese Regeln nicht durchgängig ein – sie sind die **Zielkonvention**.
 
 1. **Variablen-Präfix nach Typ**, dann CamelCase: `s`=string, `i`=integer, `r`=real,
-   `d`=date, `b`=boolean, `h`=Handle/integer. Beispiele: `sBelegNr`, `iAnzahl`, `rPreis`, `hVorgang`.
+   `d`=date, `b`=boolean. **Kein eigenes `h`-Präfix** – Handles/Referenzen (Vorgang, Position,
+   Produkt …) sind Integer und beginnen mit `i`. Beispiele: `sBelegNr`, `iAnzahl`, `rPreis`,
+   `iVorgang`, `iWaPos`.
 2. **Alle Schlüsselwörter GROSS** – Sprache (`PROGRAM/VAR/BEGIN/IF/WHILE/REPEAT/UNTIL…`)
    und SQL (`SELECT/FROM/JOIN/WHERE/ORDER BY`).
 3. **SELECT-Format:** erste Spalte hinter `SELECT`, weitere je Zeile mit führendem Komma;
@@ -111,7 +113,7 @@ Feld-IDs stehen in Tabelle **`FormPosition`**: `FormPosNummer`=ID, `FormPosGatte
 Kopf **und** Position teilen die Tabelle. Lookup:
 `SELECT FormPosNummer, FormPosBezeich, FormPosGatterDefine, FormPosCSharpTyp FROM FormPosition WHERE FormPosBezeich LIKE '%…%'`.
 
-- **Kopf:** `GetValue(hVorg, id, sBuf, 0)` / `SetValue(...)`. **Position:** `GetValPos(hWaPos, id, sBuf, 0)` / `SetValPos(...)`.
+- **Kopf:** `GetValue(iVorg, id, sBuf, 0)` / `SetValue(...)`. **Position:** `GetValPos(iWaPos, id, sBuf, 0)` / `SetValPos(...)`.
 - **4. Argument** = Instanzindex (meist `0`; `1/2/3` nur bei mehreren gleichartigen Objekten).
 - Konvertierung nach `FormPosCSharpTyp`: `int/short`→`STRTOINT`/`%d`, `double`→`STRTOREAL`/`%.Nf`
   (N=`FormPosNachkDef`), `DateTime`→**immer deutsch `TT.MM.JJJJ`**, `string`→direkt.

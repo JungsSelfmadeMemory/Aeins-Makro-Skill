@@ -8,7 +8,8 @@ Bitte je Frage kurz beantworten (Nummer genügt). Danach arbeite ich die Antwort
 ## Konventionen
 
 **F1 — Variablen-Präfixe.** ✅ **BEANTWORTET:** `s`=string, `i`=integer, `r`=real,
-`d`=date, `b`=boolean, `h`=Handle; Rest CamelCase (`sBelegNr`, `hVorgang`).
+`d`=date, `b`=boolean; Rest CamelCase (`sBelegNr`, `iAnzahl`). **Kein `h`-Präfix** –
+Handles/Referenzen sind Integer → `i` (`iVorgang`, `iWaPos`).
 Rest-Detailfragen (offen, niedrige Prio): Präfix für Konstanten/globale Jvars?
 
 **F2 — Einrückung/Format.** ✅ **BEANTWORTET:** immer Leerzeichen, nie Tabs.

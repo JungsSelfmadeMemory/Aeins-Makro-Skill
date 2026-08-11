@@ -12,7 +12,7 @@
 
 | Spalte | Bedeutung | Nutzung im Makro |
 |---|---|---|
-| `FormPosNummer` | **die ID**, die an Get/Set übergeben wird | `SetValue(hVorg, 1001, sBuf, 0)` |
+| `FormPosNummer` | **die ID**, die an Get/Set übergeben wird | `SetValue(iVorg, 1001, sBuf, 0)` |
 | `FormPosGatterDefine` | **Konstantenname** – so im `CONST`-Block deklarieren | `ID_MENGE = 1001;` |
 | `FormPosBezeich` | Klartext-Bezeichnung des Feldes | Doku/Orientierung |
 | `FormPosCSharpTyp` | **echter Datentyp**: `int` / `short` / `double` / `string` / `DateTime` | steuert Konvertierung (s. u.) |
@@ -119,11 +119,11 @@ BEGIN
    sBuf := ALLOC(64);
 
    // Positionsmenge lesen (double):
-   GetValPos(hWaPos, ID_MENGE, sBuf, 0);
+   GetValPos(iWaPos, ID_MENGE, sBuf, 0);
    rMenge := STRTOREAL(sBuf);
 
    // Plan-Lieferdatum in Position schreiben (DateTime):
-   SetValPos(hWaPos, ID_WABEWPLANDAT, sDatum, 0);
+   SetValPos(iWaPos, ID_WABEWPLANDAT, sDatum, 0);
 
    FREE(sBuf);
 END.
