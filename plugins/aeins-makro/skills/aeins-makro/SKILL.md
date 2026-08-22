@@ -177,6 +177,8 @@ END;
 `JPPINS`=String (`JPPIN`=generisch) · `JPPEX(hdl,"Methode")` (1=ok, kein Puffer) ·
 `JPPDO(hdl,"Methode",buf,len)` (Ergebnis im Puffer) · `JPPDELETE(hdl)`.
 Vollständiges Beispiel: `assets/KM_AuftraegeGenerieren.pas`.
+**Alle Methoden je Klasse** (128 Klassen, 1626 Methoden, mit Übergabeparametern): siehe
+`references/jpp-klassenreferenz.md` + `references/jpp/<Klasse>.md`.
 
 ---
 
@@ -224,3 +226,5 @@ Keine offizielle Gesamtreferenz; wichtigste Kommandos:
 - `makro-einbindung-kontexte.md` – **Einbindung/Architektur** aus den AMIC-Schulungen:
   Kontrollmakro (Einstiegspunkte, Bearbeitungsarten, GSKM/FAZ), Masken-/Feldmakro (Shift+F3/AIS,
   OnSave, `Get/SetLDBArray`), Test-Unit/Nachlauf, FAI-Import/Datenstrom/Mandantenserver.
+- `jpp-klassenreferenz.md` (+ `jpp/<Klasse>.md`) – **JPP-Methodenreferenz**: 128 Klassen, 1626
+  Methoden mit Übergabeparametern (Typ/Pflicht/Default) und Rückgabe (aus dem Quellcode generiert).

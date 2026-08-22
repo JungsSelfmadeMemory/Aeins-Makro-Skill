@@ -516,6 +516,12 @@ Werte-Rückgabe eines Feldes typischerweise: `JPPINS(hdl,"Feld","…"); JPPDO(hd
 `JSystem`, `JFA_View`, `JEAI_Metis`, `JFileSystem`, `JEtikettenDruck`, `JVars`, `JPfleger`,
 `JExec`, `JWaagenprofil`, `JLvsHalter`, `JElara`, `JEAI_Thebe/Telesto`, `JA1Extern`, `CHelper`.
 
+> **Vollständige Methodenreferenz:** [`JPP-Klassenreferenz.md`](JPP-Klassenreferenz.md) listet alle
+> **128 JPP-Klassen** (1626 Methoden); je Klasse eine Datei unter [`JPP-Klassen/`](JPP-Klassen/)
+> mit **Methode + Übergabeparametern** (Typ · Pflicht · Default) und Rückgabe. Kernhelfer:
+> `CVorgangsHelper` (Vorgänge), `CProduktHelper` (Produktion), `CUmbuchungsHelper` (Umbuchung),
+> `CRwVorgHelper` (Rohware), `JVars`, `JA1Extern`, `JFileSystem`.
+
 ---
 
 ## 8. Steuerung & Umgebung
